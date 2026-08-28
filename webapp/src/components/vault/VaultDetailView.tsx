@@ -95,6 +95,7 @@ function PasswordHistoryDialog(props: {
 export default function VaultDetailView(props: VaultDetailViewProps) {
   const selectedAttachments = Array.isArray(props.selectedCipher.attachments) ? props.selectedCipher.attachments : [];
   const [showSshPrivateKey, setShowSshPrivateKey] = useState(false);
+  const [showCardCode, setShowCardCode] = useState(false);
   const [passwordHistoryOpen, setPasswordHistoryOpen] = useState(false);
   const [breachResult, setBreachResult] = useState<PasswordBreachResult | null>(null);
   const [checkingBreach, setCheckingBreach] = useState(false);
@@ -115,6 +116,7 @@ export default function VaultDetailView(props: VaultDetailViewProps) {
     breachControllerRef.current?.abort();
     breachControllerRef.current = null;
     setShowSshPrivateKey(false);
+    setShowCardCode(false);
     setPasswordHistoryOpen(false);
     setBreachResult(null);
     setCheckingBreach(false);
@@ -302,17 +304,60 @@ export default function VaultDetailView(props: VaultDetailViewProps) {
           {props.selectedCipher.card && (
             <div className="card">
               <h4>{t('txt_card_details')}</h4>
-              <div className="kv-line"><span>{t('txt_cardholder_name')}</span><strong>{props.selectedCipher.card.decCardholderName || ''}</strong></div>
-              <div className="kv-line"><span>{t('txt_number')}</span><strong>{props.selectedCipher.card.decNumber || ''}</strong></div>
-              <div className="kv-line">
-                <span>{t('txt_brand')}</span>
-                <strong className="card-brand-detail">
-                  <CardBrandIcon brand={props.selectedCipher.card.decBrand} />
-                  {displayCardBrand(props.selectedCipher.card.decBrand)}
-                </strong>
+              <div className="kv-row">
+                <span className="kv-label">{t('txt_cardholder_name')}</span>
+                <div className="kv-main">
+                  <strong className="value-ellipsis" title={props.selectedCipher.card.decCardholderName || ''}>{props.selectedCipher.card.decCardholderName || ''}</strong>
+                </div>
               </div>
-              <div className="kv-line"><span>{t('txt_expiry')}</span><strong>{`${props.selectedCipher.card.decExpMonth || ''}/${props.selectedCipher.card.decExpYear || ''}`}</strong></div>
-              <div className="kv-line"><span>{t('txt_security_code')}</span><strong>{props.selectedCipher.card.decCode || ''}</strong></div>
+              <div className="kv-row">
+                <span className="kv-label">{t('txt_number')}</span>
+                <div className="kv-main">
+                  <strong className="value-ellipsis" title={props.selectedCipher.card.decNumber || ''}>
+                    {props.selectedCipher.card.decNumber || ''}
+                  </strong>
+                </div>
+                <div className="kv-actions">
+                  <button type="button" className="btn btn-secondary small" onClick={() => copyToClipboard(props.selectedCipher.card?.decNumber || '')}>
+                    <Clipboard size={14} className="btn-icon" /> {t('txt_copy')}
+                  </button>
+                </div>
+              </div>
+              <div className="kv-row">
+                <span className="kv-label">{t('txt_brand')}</span>
+                <div className="kv-main">
+                  <strong className="card-brand-detail">
+                    <CardBrandIcon brand={props.selectedCipher.card.decBrand} />
+                    {displayCardBrand(props.selectedCipher.card.decBrand)}
+                  </strong>
+                </div>
+              </div>
+              <div className="kv-row">
+                <span className="kv-label">{t('txt_expiry')}</span>
+                <div className="kv-main">
+                  <strong className="value-ellipsis" title={`${props.selectedCipher.card.decExpMonth || ''}/${props.selectedCipher.card.decExpYear || ''}`}>{`${props.selectedCipher.card.decExpMonth || ''}/${props.selectedCipher.card.decExpYear || ''}`}</strong>
+                </div>
+              </div>
+              <div className="kv-row">
+                <span className="kv-label">{t('txt_security_code')}</span>
+                <div className="kv-main">
+                  <strong
+                    className="value-ellipsis"
+                    title={showCardCode ? props.selectedCipher.card.decCode || '' : maskSecret(props.selectedCipher.card.decCode || '')}
+                  >
+                    {showCardCode ? props.selectedCipher.card.decCode || '' : maskSecret(props.selectedCipher.card.decCode || '')}
+                  </strong>
+                </div>
+                <div className="kv-actions">
+                  <button type="button" className="btn btn-secondary small" onClick={() => setShowCardCode((value) => !value)}>
+                    {showCardCode ? <EyeOff size={14} className="btn-icon" /> : <Eye size={14} className="btn-icon" />}
+                    {showCardCode ? t('txt_hide') : t('txt_reveal')}
+                  </button>
+                  <button type="button" className="btn btn-secondary small" onClick={() => copyToClipboard(props.selectedCipher.card?.decCode || '')}>
+                    <Clipboard size={14} className="btn-icon" /> {t('txt_copy')}
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 
