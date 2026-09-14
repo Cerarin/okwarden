@@ -91,6 +91,22 @@
 >   | KV | No | 25 MiB (Cloudflare limit) | 1 GB |
 
 
+## FAQ
+
+- **After forking, Cloudflare can't see my repository — or it returns 404 when I pick it?**
+  GitHub detects that the repository reuses this project's name and flags your GitHub account. Once the account is flagged, the repository is missing from Cloudflare's list, or returns a 404 when opened. To avoid it, rename the fork to something different from upstream at fork time (change the description too, to be safe), e.g. `2233warden`. For an existing fork, just rename it in the GitHub repository settings.
+
+- **I deleted my deployment and redeployed — why does registration ask for an invite code again?**
+  Because the data is still there. Delete the D1 database and the KV namespace as well; otherwise the old users and invite-code settings remain, and registration keeps enforcing the invite code.
+
+- **I set `JWT_SECRET`, but the page still reports it as missing?**
+  Set it under **Workers settings → Variables and Secrets** (runtime variables and secrets), not under *Build*. Build-time variables only exist while building, so the Worker cannot read them at runtime.
+
+- **Why does `JWT_SECRET` disappear after an upgrade?**
+  Store it as a **Secret** instead of a plain text variable. Plain variables can be overwritten or cleared on rebuild or redeploy; secrets persist.
+
+---
+
 ## How to update
 
 - Manual: open your fork on GitHub; when the sync banner appears, click **Sync fork** → **Update branch**
