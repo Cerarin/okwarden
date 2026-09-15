@@ -93,17 +93,20 @@
 
 ## FAQ
 
-- **After forking, Cloudflare can't see my repository — or it returns 404 when I pick it?**
-  GitHub detects that the repository reuses this project's name and flags your GitHub account. Once the account is flagged, the repository is missing from Cloudflare's list, or returns a 404 when opened. To avoid it, rename the fork to something different from upstream at fork time (change the description too, to be safe), e.g. `2233warden`. For an existing fork, just rename it in the GitHub repository settings.
+- **After forking the repository, why can't I see my repository when connecting GitHub to Cloudflare, or why do I get a 404 after selecting it?**  
+  This is usually related to how the GitHub fork is identified or how Cloudflare handles repository authorization and synchronization. If the fork keeps a repository name, description, or other information that is very similar to the upstream project, it may be more likely to trigger related restrictions or issues. It is recommended to rename the repository to something different from the upstream project when creating the fork, and change the repository description as well. For example, you can rename it to `2233warden`. If you have already created the fork, you can rename the repository and update its description in the GitHub repository settings, then try connecting it to Cloudflare again.
 
-- **I deleted my deployment and redeployed — why does registration ask for an invite code again?**
-  Because the data is still there. Delete the D1 database and the KV namespace as well; otherwise the old users and invite-code settings remain, and registration keeps enforcing the invite code.
+- **I deleted my deployment and redeployed it. Why does registration require an invite code again?**  
+  Deleting the Worker or redeploying it does not automatically delete the persistent data that was already created. The users, invite codes, and related configuration stored in the D1 database and KV namespace are still there, so the newly deployed Worker continues to read the existing data and enforce the invite-code requirement.  
+  If you want to start completely from scratch, you need to delete the corresponding **D1 database and KV namespace** as well.
 
-- **I set `JWT_SECRET`, but the page still reports it as missing?**
-  Set it under **Workers settings → Variables and Secrets** (runtime variables and secrets), not under *Build*. Build-time variables only exist while building, so the Worker cannot read them at runtime.
+- **I configured `JWT_SECRET`, but the page still says it is missing. Why?**  
+  Make sure `JWT_SECRET` is configured under **Workers → Settings → Variables and Secrets**, specifically as a **Runtime variable or Secret**, rather than under **Build variables**.  
+  Build-time variables are only available during the build process. They are not available to the Worker at runtime, so the build may succeed while the application still reports that `JWT_SECRET` is missing.
 
-- **Why does `JWT_SECRET` disappear after an upgrade?**
-  Store it as a **Secret** instead of a plain text variable. Plain variables can be overwritten or cleared on rebuild or redeploy; secrets persist.
+- **Why does `JWT_SECRET` seem to disappear after an upgrade or redeployment?**  
+  It is recommended to store `JWT_SECRET` as a **Secret** rather than as a plain-text variable. `JWT_SECRET` is a sensitive runtime credential and should not be committed to the repository.  
+  If your deployment process recreates or overwrites the Worker variable configuration, ordinary variables may be affected. Secrets are more appropriate for sensitive configuration that needs to remain available across multiple deployments. If the application still reports that `JWT_SECRET` is missing after a redeployment, check **Variables and Secrets** for the current Worker and make sure the Secret is still configured.
 
 ---
 
